@@ -1,12 +1,7 @@
 # MetaNetX
 
-![master Branch](https://img.shields.io/badge/branch-master-blue.svg)
-[![master Build Status](https://travis-ci.org/DD-DeCaF/metanetx.svg?branch=master)](https://travis-ci.org/DD-DeCaF/metanetx)
-[![master Codecov](https://codecov.io/gh/DD-DeCaF/metanetx/branch/master/graph/badge.svg)](https://codecov.io/gh/DD-DeCaF/metanetx/branch/master)
-
-![devel Branch](https://img.shields.io/badge/branch-devel-blue.svg)
-[![devel Build Status](https://travis-ci.org/DD-DeCaF/metanetx.svg?branch=devel)](https://travis-ci.org/DD-DeCaF/metanetx)
-[![devel Codecov](https://codecov.io/gh/DD-DeCaF/metanetx/branch/devel/graph/badge.svg)](https://codecov.io/gh/DD-DeCaF/metanetx/branch/devel)
+[![Build Status](https://travis-ci.org/DD-DeCaF/metanetx.svg?branch=master)](https://travis-ci.org/DD-DeCaF/metanetx)
+[![Codecov](https://codecov.io/gh/DD-DeCaF/metanetx/branch/master/graph/badge.svg)](https://codecov.io/gh/DD-DeCaF/metanetx/branch/master)
 
 ## Development
 
