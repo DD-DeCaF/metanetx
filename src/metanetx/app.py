@@ -30,7 +30,7 @@ app = Flask(__name__)
 def init_app(application):
     """Initialize the main app with config information and routes."""
     # Import local modules here to avoid circular dependencies.
-    from metanetx import errorhandlers, resources
+    from metanetx import errorhandlers, data, resources
     from metanetx.settings import current_config
 
     application.config.from_object(current_config())
@@ -62,3 +62,6 @@ def init_app(application):
     # We require this in order to serve the HTML version of the OpenAPI docs
     # via https.
     application.wsgi_app = ProxyFix(application.wsgi_app)
+
+    # Read the metanetx source files into memory
+    data.read_metanetx_files()
