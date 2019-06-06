@@ -1,0 +1,107 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: metanetx-production
+spec:
+  selector:
+    matchLabels:
+      app: metanetx
+      env: production
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: metanetx
+        env: production
+    spec:
+      containers:
+      - name: web
+        image: gcr.io/dd-decaf-cfbf6/metanetx:master
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
+        env:
+        - name: ENVIRONMENT
+          value: production
+        - name: SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: metanetx-production
+              key: SECRET_KEY
+        - name: SCRIPT_NAME
+          value: /metanetx
+        - name: FLASK_APP
+          value: src/metanetx/wsgi.py
+        - name: ALLOWED_ORIGINS
+          value: https://app.dd-decaf.eu,http://localhost:4200
+        - name: SENTRY_DSN
+          valueFrom:
+            secretKeyRef:
+              name: metanetx-production
+              key: SENTRY_DSN
+        command: ["gunicorn", "-c", "gunicorn.py", "metanetx.wsgi:app"]
+        readinessProbe:
+          httpGet:
+            path: /metanetx/healthz
+            port: 8000
+          initialDelaySeconds: 5
+        resources:
+          requests:
+            cpu: "10m"
+          limits:
+            cpu: "100m"
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: metanetx-staging
+spec:
+  selector:
+    matchLabels:
+      app: metanetx
+      env: staging
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: metanetx
+        env: staging
+    spec:
+      containers:
+      - name: web
+        image: gcr.io/dd-decaf-cfbf6/metanetx:devel
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
+        env:
+        - name: ENVIRONMENT
+          value: staging
+        - name: SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: metanetx-staging
+              key: SECRET_KEY
+        - name: SCRIPT_NAME
+          value: /metanetx
+        - name: FLASK_APP
+          value: src/metanetx/wsgi.py
+        - name: ALLOWED_ORIGINS
+          value: https://staging.dd-decaf.eu,http://localhost:4200
+        - name: SENTRY_DSN
+          valueFrom:
+            secretKeyRef:
+              name: metanetx-staging
+              key: SENTRY_DSN
+        command: ["gunicorn", "-c", "gunicorn.py", "metanetx.wsgi:app"]
+        readinessProbe:
+          httpGet:
+            path: /metanetx/healthz
+            port: 8000
+          initialDelaySeconds: 5
+        resources:
+          requests:
+            cpu: "5m"
+          limits:
+            cpu: "100m"

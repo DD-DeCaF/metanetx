@@ -1,0 +1,32 @@
+version: "3.1"
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: gcr.io/dd-decaf-cfbf6/metanetx:${IMAGE_TAG:-latest}
+    networks:
+      default:
+      DD-DeCaF:
+        aliases:
+          - metanetx
+    ports:
+      - "${API_PORT:-8000}:8000"
+    volumes:
+      - ".:/app"
+    environment:
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+      - FLASK_APP=src/metanetx/wsgi.py
+      - SCRIPT_NAME=${SCRIPT_NAME}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost:4200}
+      - SENTRY_DSN=${SENTRY_DSN}
+    command: gunicorn -c gunicorn.py metanetx.wsgi:app
+
+# Additional services that the `web` service `depends_on` should usually only
+# be on the default network and not exposed on the general network, i.e.,
+# networks:
+#   - default
+
+networks:
+  DD-DeCaF:
+    external: true
