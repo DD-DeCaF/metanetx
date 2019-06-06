@@ -17,9 +17,7 @@
 set -xeu
 
 if [ "${TRAVIS_BRANCH}" = "master" ]; then
-  DEPLOYMENT=metanetx-production
-elif [ "${TRAVIS_BRANCH}" = "devel" ]; then
-  DEPLOYMENT=metanetx-staging
+  DEPLOYMENT=metanetx
 else
   echo "Skipping deployment for branch ${TRAVIS_BRANCH}"
   exit 0

@@ -1,27 +1,11 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: metanetx-production
+  name: metanetx
 spec:
   selector:
     app: metanetx
     env: production
-  ports:
-  - name: web
-    protocol: TCP
-    port: 80
-    targetPort: 8000
-
----
-
-kind: Service
-apiVersion: v1
-metadata:
-  name: metanetx-staging
-spec:
-  selector:
-    app: metanetx
-    env: staging
   ports:
   - name: web
     protocol: TCP

@@ -8,7 +8,6 @@ spec:
   tls:
   - hosts:
     - api.dd-decaf.eu
-    - api-staging.dd-decaf.eu
     secretName: decaf-tls
   rules:
   - host: api.dd-decaf.eu
@@ -16,12 +15,5 @@ spec:
       paths:
       - path: /metanetx
         backend:
-          serviceName: metanetx-production
-          servicePort: 80
-  - host: api-staging.dd-decaf.eu
-    http:
-      paths:
-      - path: /metanetx
-        backend:
-          serviceName: metanetx-staging
+          serviceName: metanetx
           servicePort: 80
