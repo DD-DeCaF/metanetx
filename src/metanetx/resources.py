@@ -18,7 +18,8 @@
 from flask_apispec import MethodResource, marshal_with, use_kwargs
 from flask_apispec.extension import FlaskApiSpec
 
-from .schemas import HelloSchema
+from . import data
+from .schemas import ReactionSearchSchema
 
 
 def init_app(app):
@@ -30,7 +31,7 @@ def init_app(app):
 
     docs = FlaskApiSpec(app)
     app.add_url_rule("/healthz", view_func=healthz)
-    register("/hello", HelloResource)
+    register("/reactions", ReactionResource)
 
 
 def healthz():
@@ -44,16 +45,10 @@ def healthz():
     return ""
 
 
-class HelloResource(MethodResource):
-    """Example API resource."""
-
-    @use_kwargs(HelloSchema)
-    @marshal_with(HelloSchema, code=200)
-    def get(self, name):
-        """
-        Implement example endpoint.
-
-        This demonstrates both how to use request argument validation
-        (use_kwargs) and response marshalling (marshal_with).
-        """
-        return {"name": name}
+class ReactionResource(MethodResource):
+    @use_kwargs(ReactionSearchSchema)
+    def get(self, query):
+        results = [
+            r for r in data.reactions.values() if r.mnx_id == query
+        ]
+        return {"results": results}

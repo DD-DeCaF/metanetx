@@ -18,16 +18,8 @@
 from marshmallow import Schema, fields
 
 
-class StrictSchema(Schema):
-    """Shared empty schema instance with strict validation."""
+class ReactionSearchSchema(Schema):
+    query = fields.Str(required=True)
 
     class Meta:
-        """Meta class for marshmallow schemas."""
-
         strict = True
-
-
-class HelloSchema(StrictSchema):
-    """Example schema."""
-
-    name = fields.Str(required=True)
