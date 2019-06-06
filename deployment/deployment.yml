@@ -33,7 +33,7 @@ spec:
         - name: FLASK_APP
           value: src/metanetx/wsgi.py
         - name: ALLOWED_ORIGINS
-          value: https://caffeine.dd-decaf.eu,http://localhost:4200
+          value: "*"
         - name: SENTRY_DSN
           valueFrom:
             secretKeyRef:
