@@ -15,8 +15,14 @@
 
 """Data classes for MetaNetX data."""
 
-from collections import namedtuple
 import logging
+import os
+from collections import namedtuple
+from gzip import GzipFile
+from io import BytesIO, TextIOWrapper
+
+import requests
+
 
 logger = logging.getLogger(__name__)
 
@@ -30,35 +36,40 @@ reactions = {}
 metabolites = {}
 
 
-def read_metanetx_files():
-    with open("data/comp_prop.tsv") as file_:
-        for line in file_:
-            if line.startswith("#"):
-                continue
-            mnx_id, name, xref = line.rstrip("\n").split("\t")
-            compartments[mnx_id] = Compartment(
-                mnx_id=mnx_id, name=name, xref=xref
-            )
+def load_metanetx_data():
+    for line in _retrieve("comp_prop.tsv"):
+        if line.startswith("#"):
+            continue
+        mnx_id, name, xref = line.rstrip("\n").split("\t")
+        compartments[mnx_id] = Compartment(mnx_id=mnx_id, name=name, xref=xref)
     logger.info(f"Loaded {len(compartments)} compartments")
 
-    with open("data/reac_prop.tsv") as file_:
-        for line in file_:
-            if line.startswith("#"):
-                continue
-            mnx_id, equation, _, _, ec, _ = line.rstrip("\n").split("\t")
-            reactions[mnx_id] = Reaction(
-                mnx_id=mnx_id, equation=equation, ec=ec
-            )
+    for line in _retrieve("reac_prop.tsv"):
+        if line.startswith("#"):
+            continue
+        mnx_id, equation, _, _, ec, _ = line.rstrip("\n").split("\t")
+        reactions[mnx_id] = Reaction(mnx_id=mnx_id, equation=equation, ec=ec)
     logger.info(f"Loaded {len(reactions)} reactions")
 
-    with open("data/chem_prop.tsv", "rt") as file_:
-        for line in file_:
-            if line.startswith("#"):
-                continue
-            mnx_id, description, _, _, _, _, _, _, _ = line.rstrip("\n").split(
-                "\t"
-            )
-            metabolites[mnx_id] = Metabolite(
-                mnx_id=mnx_id, description=description
-            )
+    for line in _retrieve("chem_prop.tsv"):
+        if line.startswith("#"):
+            continue
+        mnx_id, description, _, _, _, _, _, _, _ = line.rstrip("\n").split("\t")
+        metabolites[mnx_id] = Metabolite(mnx_id=mnx_id, description=description)
     logger.info(f"Loaded {len(metabolites)} metabolites")
+
+
+def _retrieve(filename):
+    if os.environ.get("LOCAL_METANETX_DATA"):
+        logger.debug(f"Reading data/{filename}")
+        with open(f"data/{filename}") as file_:
+            for line in file_:
+                yield line
+    else:
+        logger.debug(f"Downloading {filename} from external storage")
+        r = requests.get(
+            f"https://storage.googleapis.com/dd-decaf/metanetx/{filename}.gz"
+        )
+        with TextIOWrapper(GzipFile(fileobj=BytesIO(r.content))) as file_:
+            for line in file_:
+                yield line

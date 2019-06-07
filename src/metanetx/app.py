@@ -64,4 +64,4 @@ def init_app(application):
     application.wsgi_app = ProxyFix(application.wsgi_app)
 
     # Read the metanetx source files into memory
-    data.read_metanetx_files()
+    data.load_metanetx_data()

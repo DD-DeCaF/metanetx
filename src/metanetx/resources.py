@@ -48,7 +48,5 @@ def healthz():
 class ReactionResource(MethodResource):
     @use_kwargs(ReactionSearchSchema)
     def get(self, query):
-        results = [
-            r for r in data.reactions.values() if r.mnx_id == query
-        ]
+        results = [r for r in data.reactions.values() if r.mnx_id == query]
         return {"results": results}

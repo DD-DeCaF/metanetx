@@ -8,6 +8,17 @@
 Run `make setup` first when initializing the project for the first time. Type
 `make` to see all commands.
 
+### Source files
+
+The MetaNetX source files are stored in DD-DeCaF's google cloud storage
+retrieved on startup. They're not stored in the repo as they're too large, and
+we're not downloading them directly from metanetx.org because 1) our deployments
+should not depend on the availability on the metanetx.org service, and 2) to
+avoid compatibility issues if the source file format is updated.
+
+To speed up source file reads during development, download them into the `data/`
+folder and set `LOCAL_METANETX_DATA=1` in your `.env`.
+
 ### Environment
 
 Specify environment variables in a `.env` file. See `docker-compose.yml` for the
