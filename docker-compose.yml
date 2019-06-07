@@ -20,7 +20,7 @@ services:
       - SCRIPT_NAME=${SCRIPT_NAME}
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost:4200}
       - SENTRY_DSN=${SENTRY_DSN}
-      - LOCAL_METANETX_DATA=${LOCAL_METANETX_DATA:-}
+      - LOCAL_METANETX_DATA=${LOCAL_METANETX_DATA}
     command: gunicorn -c gunicorn.py metanetx.wsgi:app
 
 # Additional services that the `web` service `depends_on` should usually only
