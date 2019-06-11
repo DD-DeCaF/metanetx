@@ -52,6 +52,8 @@ class Reaction:
     @property
     def equation_parsed(self):
         """
+        Parse the reactions equation string.
+
         Returns a list of all metabolites used in the equation, with the
         following keys:
 
