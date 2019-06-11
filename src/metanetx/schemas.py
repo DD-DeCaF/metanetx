@@ -23,3 +23,26 @@ class ReactionSearchSchema(Schema):
 
     class Meta:
         strict = True
+
+
+class CompartmentSchema(Schema):
+    mnx_id = fields.Str()
+    name = fields.Str()
+    xref = fields.Str()
+
+
+class ReactionSchema(Schema):
+    mnx_id = fields.Str()
+    equation = fields.Str()
+    ec = fields.Str()
+
+
+class MetaboliteSchema(Schema):
+    mnx_id = fields.Str()
+    description = fields.Str()
+
+
+class ReactionResponseSchema(Schema):
+    reaction = fields.Nested(ReactionSchema)
+    metabolites = fields.Nested(MetaboliteSchema, many=True)
+    compartments = fields.Nested(CompartmentSchema, many=True)

@@ -15,11 +15,11 @@
 
 """Implement RESTful API endpoints using resources."""
 
-from flask_apispec import MethodResource, use_kwargs
+from flask_apispec import MethodResource, marshal_with, use_kwargs
 from flask_apispec.extension import FlaskApiSpec
 
 from . import data
-from .schemas import ReactionSearchSchema
+from .schemas import ReactionSearchSchema, ReactionResponseSchema
 
 
 def init_app(app):
@@ -47,6 +47,26 @@ def healthz():
 
 class ReactionResource(MethodResource):
     @use_kwargs(ReactionSearchSchema)
+    @marshal_with(ReactionResponseSchema(many=True), code=200)
     def get(self, query):
-        results = [r for r in data.reactions.values() if r.mnx_id == query]
-        return {"results": results}
+        # Search through the data store for matching reactions.
+        reactions = [r for r in data.reactions.values() if r.mnx_id == query]
+        # Collect all unique references to metabolites and compartments, and
+        # include the objects in the response.
+        results = []
+        for reaction in reactions:
+            equation = reaction.parse_equation()
+            metabolite_ids = set(m["metabolite_id"] for m in equation)
+            compartment_ids = set(m["compartment_id"] for m in equation)
+            results.append(
+                {
+                    "reaction": reaction,
+                    "metabolites": [
+                        data.metabolites[m] for m in metabolite_ids
+                    ],
+                    "compartments": [
+                        data.compartments[m] for m in compartment_ids
+                    ],
+                }
+            )
+        return results

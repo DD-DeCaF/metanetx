@@ -16,6 +16,7 @@
 """Data classes for MetaNetX data."""
 
 import logging
+import re
 import os
 from gzip import GzipFile
 from io import BytesIO, TextIOWrapper
@@ -38,6 +39,39 @@ class Reaction:
         self.mnx_id = mnx_id
         self.equation = equation
         self.ec = ec
+
+    def parse_equation(self):
+        """
+        Returns a list of all metabolites used in the equation, with the
+        following keys:
+
+            metabolite_id: The metanetx id of the metabolite
+            compartment_id: The metanetx id of the compartment
+            coefficient: The stoichiometry coefficient (negative if substrate,
+                positive if product)
+        """
+        equation = []
+        substrates, products = self.equation.split(" = ")
+        metabolite_regex = r"(\d+) (\w+)@(\w+)"
+        for match in re.findall(metabolite_regex, substrates):
+            coefficient, metabolite_id, compartment_id = match
+            equation.append(
+                {
+                    "metabolite_id": metabolite_id,
+                    "compartment_id": compartment_id,
+                    "coefficient": int(coefficient) * -1,
+                }
+            )
+        for match in re.findall(metabolite_regex, products):
+            coefficient, metabolite_id, compartment_id = match
+            equation.append(
+                {
+                    "metabolite_id": metabolite_id,
+                    "compartment_id": compartment_id,
+                    "coefficient": int(coefficient),
+                }
+            )
+        return equation
 
 
 class Metabolite:
