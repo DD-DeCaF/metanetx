@@ -19,6 +19,11 @@ avoid compatibility issues if the source file format is updated.
 To speed up source file reads during development, download them into the `data/`
 folder and set `LOCAL_METANETX_DATA=1` in your `.env`.
 
+Reaction names are not part of MetaNetX, but collected manually by running
+./scripts/generate_reaction_names.py`. Note that the script takes several hours
+to complete. Names are retrieved from cross referenced databases (currently
+BiGG, kegg, ModelSEED and EC numbers are checked).
+
 ### Environment
 
 Specify environment variables in a `.env` file. See `docker-compose.yml` for the
