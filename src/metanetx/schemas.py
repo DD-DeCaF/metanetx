@@ -29,17 +29,20 @@ class CompartmentSchema(Schema):
     mnx_id = fields.Str()
     name = fields.Str()
     xref = fields.Str()
+    annotation = fields.Raw()
 
 
 class ReactionSchema(Schema):
     mnx_id = fields.Str()
     equation = fields.Str()
     ec = fields.Str()
+    annotation = fields.Raw()
 
 
 class MetaboliteSchema(Schema):
     mnx_id = fields.Str()
     description = fields.Str()
+    annotation = fields.Raw()
 
 
 class ReactionResponseSchema(Schema):

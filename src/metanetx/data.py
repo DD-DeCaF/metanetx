@@ -34,12 +34,20 @@ class Compartment:
         self.name = name
         self.xref = xref
 
+    @property
+    def annotation(self):
+        return compartment_xrefs.get(self.mnx_id, {})
+
 
 class Reaction:
     def __init__(self, mnx_id, equation, ec):
         self.mnx_id = mnx_id
         self.equation = equation
         self.ec = ec
+
+    @property
+    def annotation(self):
+        return reaction_xrefs.get(self.mnx_id, {})
 
     def parse_equation(self):
         """
@@ -79,6 +87,10 @@ class Metabolite:
     def __init__(self, mnx_id, description):
         self.mnx_id = mnx_id
         self.description = description
+
+    @property
+    def annotation(self):
+        return metabolite_xrefs.get(self.mnx_id, {})
 
 
 # MetaNetX data will be read into memory into the following dicts, keyed by ID.
