@@ -15,6 +15,7 @@
 
 """Data classes for MetaNetX data."""
 
+from collections import defaultdict
 import logging
 import re
 import os
@@ -85,6 +86,11 @@ compartments = {}
 reactions = {}
 metabolites = {}
 
+# Cross-references
+compartment_xrefs = {}
+reaction_xrefs = {}
+metabolite_xrefs = {}
+
 
 def load_metanetx_data():
     for line in _retrieve("comp_prop.tsv"):
@@ -94,6 +100,17 @@ def load_metanetx_data():
         compartments[mnx_id] = Compartment(mnx_id, name, xref)
     logger.info(f"Loaded {len(compartments)} compartments")
 
+    for line in _retrieve("comp_xref.tsv"):
+        if line.startswith("#"):
+            continue
+        xref, mnx_id, _ = line.rstrip("\n").split("\t")
+        if ":" in xref:
+            namespace, reference = xref.split(":", 1)
+            if mnx_id not in compartment_xrefs:
+                compartment_xrefs[mnx_id] = defaultdict(list)
+            compartment_xrefs[mnx_id][namespace].append(reference)
+    logger.info(f"Loaded {len(compartment_xrefs)} compartment cross-references")
+
     for line in _retrieve("reac_prop.tsv"):
         if line.startswith("#"):
             continue
@@ -101,12 +118,34 @@ def load_metanetx_data():
         reactions[mnx_id] = Reaction(mnx_id, equation, ec)
     logger.info(f"Loaded {len(reactions)} reactions")
 
+    for line in _retrieve("reac_xref.tsv"):
+        if line.startswith("#"):
+            continue
+        xref, mnx_id, _ = line.rstrip("\n").split("\t")
+        if ":" in xref:
+            namespace, reference = xref.split(":", 1)
+            if mnx_id not in reaction_xrefs:
+                reaction_xrefs[mnx_id] = defaultdict(list)
+            reaction_xrefs[mnx_id][namespace].append(reference)
+    logger.info(f"Loaded {len(reaction_xrefs)} reaction cross-references")
+
     for line in _retrieve("chem_prop.tsv"):
         if line.startswith("#"):
             continue
         mnx_id, description, _, _, _, _, _, _, _ = line.rstrip("\n").split("\t")
         metabolites[mnx_id] = Metabolite(mnx_id, description)
     logger.info(f"Loaded {len(metabolites)} metabolites")
+
+    for line in _retrieve("chem_xref.tsv"):
+        if line.startswith("#"):
+            continue
+        xref, mnx_id, _, _ = line.rstrip("\n").split("\t")
+        if ":" in xref:
+            namespace, reference = xref.split(":", 1)
+            if mnx_id not in metabolite_xrefs:
+                metabolite_xrefs[mnx_id] = defaultdict(list)
+            metabolite_xrefs[mnx_id][namespace].append(reference)
+    logger.info(f"Loaded {len(metabolite_xrefs)} metabolite cross-references")
 
 
 def _retrieve(filename):
