@@ -15,10 +15,10 @@
 
 """Data classes for MetaNetX data."""
 
-from collections import defaultdict
 import logging
-import re
 import os
+import re
+from collections import defaultdict
 from gzip import GzipFile
 from io import BytesIO, TextIOWrapper
 

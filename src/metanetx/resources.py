@@ -19,7 +19,7 @@ from flask_apispec import MethodResource, marshal_with, use_kwargs
 from flask_apispec.extension import FlaskApiSpec
 
 from . import data
-from .schemas import ReactionSearchSchema, ReactionResponseSchema
+from .schemas import ReactionResponseSchema, ReactionSearchSchema
 
 
 def init_app(app):
