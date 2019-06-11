@@ -17,7 +17,6 @@
 
 import logging
 import os
-from collections import namedtuple
 from gzip import GzipFile
 from io import BytesIO, TextIOWrapper
 
@@ -26,9 +25,26 @@ import requests
 
 logger = logging.getLogger(__name__)
 
-Compartment = namedtuple("Compartment", ["mnx_id", "name", "xref"])
-Reaction = namedtuple("Reaction", ["mnx_id", "equation", "ec"])
-Metabolite = namedtuple("Metabolite", ["mnx_id", "description"])
+
+class Compartment:
+    def __init__(self, mnx_id, name, xref):
+        self.mnx_id = mnx_id
+        self.name = name
+        self.xref = xref
+
+
+class Reaction:
+    def __init__(self, mnx_id, equation, ec):
+        self.mnx_id = mnx_id
+        self.equation = equation
+        self.ec = ec
+
+
+class Metabolite:
+    def __init__(self, mnx_id, description):
+        self.mnx_id = mnx_id
+        self.description = description
+
 
 # MetaNetX data will be read into memory into the following dicts, keyed by ID.
 compartments = {}
@@ -41,21 +57,21 @@ def load_metanetx_data():
         if line.startswith("#"):
             continue
         mnx_id, name, xref = line.rstrip("\n").split("\t")
-        compartments[mnx_id] = Compartment(mnx_id=mnx_id, name=name, xref=xref)
+        compartments[mnx_id] = Compartment(mnx_id, name, xref)
     logger.info(f"Loaded {len(compartments)} compartments")
 
     for line in _retrieve("reac_prop.tsv"):
         if line.startswith("#"):
             continue
         mnx_id, equation, _, _, ec, _ = line.rstrip("\n").split("\t")
-        reactions[mnx_id] = Reaction(mnx_id=mnx_id, equation=equation, ec=ec)
+        reactions[mnx_id] = Reaction(mnx_id, equation, ec)
     logger.info(f"Loaded {len(reactions)} reactions")
 
     for line in _retrieve("chem_prop.tsv"):
         if line.startswith("#"):
             continue
         mnx_id, description, _, _, _, _, _, _, _ = line.rstrip("\n").split("\t")
-        metabolites[mnx_id] = Metabolite(mnx_id=mnx_id, description=description)
+        metabolites[mnx_id] = Metabolite(mnx_id, description)
     logger.info(f"Loaded {len(metabolites)} metabolites")
 
 
