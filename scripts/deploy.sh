@@ -18,6 +18,10 @@ set -xeu
 
 if [ "${TRAVIS_BRANCH}" = "master" ]; then
   DEPLOYMENT=metanetx
+elif [ "${TRAVIS_BRANCH}" = "devel" ]; then
+  # Temporarily deploy pushes to devel - to be removed when everything is merged
+  # to master.
+  DEPLOYMENT=metanetx
 else
   echo "Skipping deployment for branch ${TRAVIS_BRANCH}"
   exit 0
