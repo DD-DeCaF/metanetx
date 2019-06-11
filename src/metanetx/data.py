@@ -49,7 +49,8 @@ class Reaction:
     def annotation(self):
         return reaction_xrefs.get(self.mnx_id, {})
 
-    def parse_equation(self):
+    @property
+    def equation_parsed(self):
         """
         Returns a list of all metabolites used in the equation, with the
         following keys:
@@ -59,6 +60,8 @@ class Reaction:
             coefficient: The stoichiometry coefficient (negative if substrate,
                 positive if product)
         """
+        if hasattr(self, "_equation_parsed"):
+            return self._equation_parsed
         equation = []
         substrates, products = self.equation.split(" = ")
         metabolite_regex = r"(\d+) (\w+)@(\w+)"
@@ -80,6 +83,7 @@ class Reaction:
                     "coefficient": int(coefficient),
                 }
             )
+        self._equation_parsed = equation
         return equation
 
 

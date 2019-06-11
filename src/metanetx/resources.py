@@ -55,9 +55,8 @@ class ReactionResource(MethodResource):
         # include the objects in the response.
         results = []
         for reaction in reactions:
-            equation = reaction.parse_equation()
-            metabolite_ids = set(m["metabolite_id"] for m in equation)
-            compartment_ids = set(m["compartment_id"] for m in equation)
+            metabolite_ids = set(m["metabolite_id"] for m in reaction.equation_parsed)
+            compartment_ids = set(m["compartment_id"] for m in reaction.equation_parsed)
             results.append(
                 {
                     "reaction": reaction,
