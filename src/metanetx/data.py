@@ -66,14 +66,14 @@ class Reaction:
             return self._equation_parsed
         equation = []
         substrates, products = self.equation_string.split(" = ")
-        metabolite_regex = r"(\d+) (\w+)@(\w+)"
+        metabolite_regex = r"([\d|\.]+) (\w+)@(\w+)"
         for match in re.findall(metabolite_regex, substrates):
             coefficient, metabolite_id, compartment_id = match
             equation.append(
                 {
                     "metabolite_id": metabolite_id,
                     "compartment_id": compartment_id,
-                    "coefficient": int(coefficient) * -1,
+                    "coefficient": float(coefficient) * -1,
                 }
             )
         for match in re.findall(metabolite_regex, products):
@@ -82,7 +82,7 @@ class Reaction:
                 {
                     "metabolite_id": metabolite_id,
                     "compartment_id": compartment_id,
-                    "coefficient": int(coefficient),
+                    "coefficient": float(coefficient),
                 }
             )
         self._equation_parsed = equation
