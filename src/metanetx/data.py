@@ -40,9 +40,9 @@ class Compartment:
 
 
 class Reaction:
-    def __init__(self, mnx_id, equation, ec):
+    def __init__(self, mnx_id, equation_string, ec):
         self.mnx_id = mnx_id
-        self.equation = equation
+        self.equation_string = equation_string
         self.ec = ec
 
     @property
@@ -63,7 +63,7 @@ class Reaction:
         if hasattr(self, "_equation_parsed"):
             return self._equation_parsed
         equation = []
-        substrates, products = self.equation.split(" = ")
+        substrates, products = self.equation_string.split(" = ")
         metabolite_regex = r"(\d+) (\w+)@(\w+)"
         for match in re.findall(metabolite_regex, substrates):
             coefficient, metabolite_id, compartment_id = match

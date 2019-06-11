@@ -33,8 +33,14 @@ class CompartmentSchema(Schema):
 
 
 class ReactionSchema(Schema):
+    class EquationSchema(Schema):
+        metabolite_id = fields.Str()
+        compartment_id = fields.Str()
+        coefficient = fields.Float()
+
     mnx_id = fields.Str()
-    equation = fields.Str()
+    equation_string = fields.Str()
+    equation_parsed = fields.Nested(EquationSchema, many=True)
     ec = fields.Str()
     annotation = fields.Raw()
 
