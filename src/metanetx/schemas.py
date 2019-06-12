@@ -39,6 +39,7 @@ class ReactionSchema(Schema):
         coefficient = fields.Float()
 
     mnx_id = fields.Str()
+    name = fields.Str()
     equation_string = fields.Str()
     equation_parsed = fields.Nested(EquationSchema, many=True)
     ec = fields.Str()
