@@ -20,7 +20,7 @@ from flask_apispec.extension import FlaskApiSpec
 from fuzzywuzzy import fuzz
 
 from . import data
-from .schemas import ReactionResponseSchema, SearchSchema
+from .schemas import MetaboliteSchema, ReactionResponseSchema, SearchSchema
 
 
 def init_app(app):
@@ -33,6 +33,7 @@ def init_app(app):
     docs = FlaskApiSpec(app)
     app.add_url_rule("/healthz", view_func=healthz)
     register("/reactions", ReactionResource)
+    register("/metabolites", MetaboliteResource)
 
 
 def healthz():
@@ -89,3 +90,22 @@ class ReactionResource(MethodResource):
                 }
             )
         return results
+
+
+class MetaboliteResource(MethodResource):
+    @use_kwargs(SearchSchema)
+    @marshal_with(MetaboliteSchema(many=True), code=200)
+    def get(self, query):
+        # Search through the data store for matching metabolites. Levenshtein
+        # Distance is a bit too slow here, so simply search for substring
+        # matches case insensitively.
+        metabolites = [
+            m
+            for m in data.metabolites.values()
+            if query.lower() in m.mnx_id.lower()
+            or query.lower() in m.description.lower()
+        ]
+
+        # Limit the results to the first 30.
+        metabolites = metabolites[:30]
+        return metabolites
