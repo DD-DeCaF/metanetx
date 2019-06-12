@@ -15,6 +15,7 @@
 
 """Data classes for MetaNetX data."""
 
+import json
 import logging
 import os
 import re
@@ -40,8 +41,9 @@ class Compartment:
 
 
 class Reaction:
-    def __init__(self, mnx_id, equation_string, ec):
+    def __init__(self, mnx_id, name, equation_string, ec):
         self.mnx_id = mnx_id
+        self.name = name
         self.equation_string = equation_string
         self.ec = ec
 
@@ -109,14 +111,21 @@ compartment_xrefs = {}
 reaction_xrefs = {}
 metabolite_xrefs = {}
 
+# Reaction names are collected separately and merged
+reaction_names = {}
+
 
 def load_metanetx_data():
-    for line in _retrieve("comp_prop.tsv"):
+    with _retrieve("reaction_names.json") as file_:
+        reaction_names = json.load(file_)
+    logger.info(f"Loaded {len(reaction_names)} reaction name mappings")
+
+    for line in _iterate_tsv(_retrieve("comp_prop.tsv")):
         mnx_id, name, xref = line.rstrip("\n").split("\t")
         compartments[mnx_id] = Compartment(mnx_id, name, xref)
     logger.info(f"Loaded {len(compartments)} compartments")
 
-    for line in _retrieve("comp_xref.tsv"):
+    for line in _iterate_tsv(_retrieve("comp_xref.tsv")):
         xref, mnx_id, _ = line.rstrip("\n").split("\t")
         if ":" in xref:
             namespace, reference = xref.split(":", 1)
@@ -125,12 +134,13 @@ def load_metanetx_data():
             compartment_xrefs[mnx_id][namespace].append(reference)
     logger.info(f"Loaded {len(compartment_xrefs)} compartment cross-references")
 
-    for line in _retrieve("reac_prop.tsv"):
+    for line in _iterate_tsv(_retrieve("reac_prop.tsv")):
         mnx_id, equation, _, _, ec, _ = line.rstrip("\n").split("\t")
-        reactions[mnx_id] = Reaction(mnx_id, equation, ec)
+        name = reaction_names.get(mnx_id)
+        reactions[mnx_id] = Reaction(mnx_id, name, equation, ec)
     logger.info(f"Loaded {len(reactions)} reactions")
 
-    for line in _retrieve("reac_xref.tsv"):
+    for line in _iterate_tsv(_retrieve("reac_xref.tsv")):
         xref, mnx_id, _ = line.rstrip("\n").split("\t")
         if ":" in xref:
             namespace, reference = xref.split(":", 1)
@@ -139,12 +149,12 @@ def load_metanetx_data():
             reaction_xrefs[mnx_id][namespace].append(reference)
     logger.info(f"Loaded {len(reaction_xrefs)} reaction cross-references")
 
-    for line in _retrieve("chem_prop.tsv"):
+    for line in _iterate_tsv(_retrieve("chem_prop.tsv")):
         mnx_id, description, _, _, _, _, _, _, _ = line.rstrip("\n").split("\t")
         metabolites[mnx_id] = Metabolite(mnx_id, description)
     logger.info(f"Loaded {len(metabolites)} metabolites")
 
-    for line in _retrieve("chem_xref.tsv"):
+    for line in _iterate_tsv(_retrieve("chem_xref.tsv")):
         xref, mnx_id, _, _ = line.rstrip("\n").split("\t")
         if ":" in xref:
             namespace, reference = xref.split(":", 1)
@@ -157,18 +167,18 @@ def load_metanetx_data():
 def _retrieve(filename):
     if os.environ.get("LOCAL_METANETX_DATA"):
         logger.debug(f"Reading data/{filename}")
-        with open(f"data/{filename}") as file_:
-            for line in file_:
-                if line.startswith("#"):
-                    continue
-                yield line
+        return open(f"data/{filename}")
     else:
         logger.debug(f"Downloading {filename} from external storage")
         r = requests.get(
             f"https://storage.googleapis.com/dd-decaf/metanetx/{filename}.gz"
         )
-        with TextIOWrapper(GzipFile(fileobj=BytesIO(r.content))) as file_:
-            for line in file_:
-                if line.startswith("#"):
-                    continue
-                yield line
+        return TextIOWrapper(GzipFile(fileobj=BytesIO(r.content)))
+
+
+def _iterate_tsv(file_):
+    with file_:
+        for line in file_:
+            if line.startswith("#"):
+                continue
+            yield line
