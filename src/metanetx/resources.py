@@ -20,7 +20,7 @@ from flask_apispec.extension import FlaskApiSpec
 from fuzzywuzzy import fuzz
 
 from . import data
-from .schemas import ReactionResponseSchema, ReactionSearchSchema
+from .schemas import ReactionResponseSchema, SearchSchema
 
 
 def init_app(app):
@@ -47,7 +47,7 @@ def healthz():
 
 
 class ReactionResource(MethodResource):
-    @use_kwargs(ReactionSearchSchema)
+    @use_kwargs(SearchSchema)
     @marshal_with(ReactionResponseSchema(many=True), code=200)
     def get(self, query):
         # Search through the data store for matching reactions. Use Levenshtein

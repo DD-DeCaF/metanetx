@@ -18,7 +18,7 @@
 from marshmallow import Schema, fields
 
 
-class ReactionSearchSchema(Schema):
+class SearchSchema(Schema):
     query = fields.Str(required=True)
 
     class Meta:
