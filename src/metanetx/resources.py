@@ -17,6 +17,7 @@
 
 from flask_apispec import MethodResource, marshal_with, use_kwargs
 from flask_apispec.extension import FlaskApiSpec
+from fuzzywuzzy import fuzz
 
 from . import data
 from .schemas import ReactionResponseSchema, ReactionSearchSchema
@@ -49,8 +50,23 @@ class ReactionResource(MethodResource):
     @use_kwargs(ReactionSearchSchema)
     @marshal_with(ReactionResponseSchema(many=True), code=200)
     def get(self, query):
-        # Search through the data store for matching reactions.
-        reactions = [r for r in data.reactions.values() if r.mnx_id == query]
+        # Search through the data store for matching reactions. Use Levenshtein
+        # Distance to match on ID, name or EC number.
+        reactions = sorted(
+            data.reactions.values(),
+            key=lambda r: max(
+                [
+                    fuzz.ratio(query, r.mnx_id),
+                    fuzz.ratio(query, r.name),
+                    fuzz.ratio(query, r.ec),
+                ]
+            ),
+            reverse=True,
+        )
+
+        # Limit the results to the first 30.
+        reactions = reactions[:30]
+
         # Collect all unique references to metabolites and compartments, and
         # include the objects in the response.
         results = []
