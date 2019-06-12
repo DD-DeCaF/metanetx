@@ -28,9 +28,12 @@ RUN addgroup -S -g "${GID}" "${APP_USER}" && \
 
 WORKDIR "${CWD}"
 
+# g++ is required during build-time for fuzzywuzzy's python-Levenshtein
 COPY requirements.txt dev-requirements.txt ./
-RUN pip install -r requirements.txt -r dev-requirements.txt \
-    && rm -rf /root/.cache/pip
+RUN apk add --no-cache g++ \
+    && pip install -r requirements.txt -r dev-requirements.txt \
+    && rm -rf /root/.cache/pip \
+    && apk del g++
 
 COPY . "${CWD}/"
 
