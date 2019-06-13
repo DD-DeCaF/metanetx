@@ -48,7 +48,7 @@ class ReactionSchema(Schema):
 
 class MetaboliteSchema(Schema):
     mnx_id = fields.Str()
-    description = fields.Str()
+    name = fields.Str()
     annotation = fields.Raw()
 
 

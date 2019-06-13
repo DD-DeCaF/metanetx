@@ -92,9 +92,9 @@ class Reaction:
 
 
 class Metabolite:
-    def __init__(self, mnx_id, description):
+    def __init__(self, mnx_id, name):
         self.mnx_id = mnx_id
-        self.description = description
+        self.name = name
 
     @property
     def annotation(self):
@@ -150,8 +150,8 @@ def load_metanetx_data():
     logger.info(f"Loaded {len(reaction_xrefs)} reaction cross-references")
 
     for line in _iterate_tsv(_retrieve("chem_prop.tsv")):
-        mnx_id, description, _, _, _, _, _, _, _ = line.rstrip("\n").split("\t")
-        metabolites[mnx_id] = Metabolite(mnx_id, description)
+        mnx_id, name, _, _, _, _, _, _, _ = line.rstrip("\n").split("\t")
+        metabolites[mnx_id] = Metabolite(mnx_id, name)
     logger.info(f"Loaded {len(metabolites)} metabolites")
 
     for line in _iterate_tsv(_retrieve("chem_xref.tsv")):

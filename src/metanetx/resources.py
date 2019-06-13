@@ -103,7 +103,7 @@ class MetaboliteResource(MethodResource):
             m
             for m in data.metabolites.values()
             if query.lower() in m.mnx_id.lower()
-            or query.lower() in m.description.lower()
+            or query.lower() in m.name.lower()
         ]
 
         # Limit the results to the first 30.
