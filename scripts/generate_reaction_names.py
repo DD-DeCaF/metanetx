@@ -21,6 +21,7 @@ up the common names for the reaction from BiGG, kegg, modelseed or EC.
 """
 
 from collections import defaultdict
+import csv
 import logging
 import logging.config
 import json
@@ -67,14 +68,8 @@ response = requests.get(
     stream=True,
 )
 response.raise_for_status()
-for line in response.iter_lines(decode_unicode=True):
-    if line.startswith("id\t"):
-        # Skip header line
-        continue
-    id, abbreviation, name, code, stoichiometry, is_transport, equation, definition, reversibility, direction, abstract_reaction, pathways, aliases, ec_numbers, deltag, deltagerr, compound_ids, status, is_obsolete, linked_reaction, notes, source, ontology = line.split(
-        "\t"
-    )
-    model_seed_map[id] = name
+for row in csv.DictReader(response.iter_lines(decode_unicode=True), delimiter="\t"):
+    model_seed_map[row["id"]] = row["name"]
 logger.info(f"Mapped {len(model_seed_map)} ModelSEED reactions")
 
 logger.info("Reading metanetx source files")
