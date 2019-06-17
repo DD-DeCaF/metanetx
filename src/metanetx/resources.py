@@ -58,7 +58,7 @@ class ReactionResource(MethodResource):
             key=lambda r: max(
                 [
                     fuzz.ratio(query, r.mnx_id),
-                    fuzz.ratio(query, r.name),
+                    fuzz.partial_ratio(query, r.name),
                     fuzz.ratio(query, r.ec),
                 ]
             ),
