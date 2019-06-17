@@ -41,18 +41,21 @@ class Compartment:
 
 
 class Reaction:
+    metabolite_regex = re.compile(r"([\d|\.]+) (\w+)@(\w+)")
+
     def __init__(self, mnx_id, name, equation_string, ec):
         self.mnx_id = mnx_id
         self.name = name
         self.equation_string = equation_string
+        self.equation_parsed = Reaction.parse_equation(self.equation_string)
         self.ec = ec
 
     @property
     def annotation(self):
         return reaction_xrefs.get(self.mnx_id, {})
 
-    @property
-    def equation_parsed(self):
+    @staticmethod
+    def parse_equation(equation_string):
         """
         Parse the reactions equation string.
 
@@ -64,12 +67,9 @@ class Reaction:
             coefficient: The stoichiometry coefficient (negative if substrate,
                 positive if product)
         """
-        if hasattr(self, "_equation_parsed"):
-            return self._equation_parsed
         equation = []
-        substrates, products = self.equation_string.split(" = ")
-        metabolite_regex = r"([\d|\.]+) (\w+)@(\w+)"
-        for match in re.findall(metabolite_regex, substrates):
+        substrates, products = equation_string.split(" = ")
+        for match in re.findall(Reaction.metabolite_regex, substrates):
             coefficient, metabolite_id, compartment_id = match
             equation.append(
                 {
@@ -78,7 +78,7 @@ class Reaction:
                     "coefficient": float(coefficient) * -1,
                 }
             )
-        for match in re.findall(metabolite_regex, products):
+        for match in re.findall(Reaction.metabolite_regex, products):
             coefficient, metabolite_id, compartment_id = match
             equation.append(
                 {
@@ -87,7 +87,6 @@ class Reaction:
                     "coefficient": float(coefficient),
                 }
             )
-        self._equation_parsed = equation
         return equation
 
 
