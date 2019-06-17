@@ -41,7 +41,7 @@ class Compartment:
 
 
 class Reaction:
-    metabolite_regex = re.compile(r"([\d|\.]+) (\w+)@(\w+)")
+    metabolite_regex = re.compile(r"^([\d\.]+) (\w+)@(\w+)$")
 
     def __init__(self, mnx_id, name, equation_string, ec):
         self.mnx_id = mnx_id
@@ -69,8 +69,11 @@ class Reaction:
         """
         equation = []
         substrates, products = equation_string.split(" = ")
-        for match in re.findall(Reaction.metabolite_regex, substrates):
-            coefficient, metabolite_id, compartment_id = match
+        for substrate in substrates.split(" + "):
+            match = re.match(Reaction.metabolite_regex, substrate)
+            if not match:
+                raise ValueError(f"Invalid metabolite format: {substrate}")
+            coefficient, metabolite_id, compartment_id = match.groups()
             equation.append(
                 {
                     "metabolite_id": metabolite_id,
@@ -78,8 +81,11 @@ class Reaction:
                     "coefficient": float(coefficient) * -1,
                 }
             )
-        for match in re.findall(Reaction.metabolite_regex, products):
-            coefficient, metabolite_id, compartment_id = match
+        for product in products.split(" + "):
+            match = re.match(Reaction.metabolite_regex, product)
+            if not match:
+                raise ValueError(f"Invalid metabolite format: {product}")
+            coefficient, metabolite_id, compartment_id = match.groups()
             equation.append(
                 {
                     "metabolite_id": metabolite_id,
@@ -133,11 +139,18 @@ def load_metanetx_data():
             compartment_xrefs[mnx_id][namespace].append(reference)
     logger.info(f"Loaded {len(compartment_xrefs)} compartment cross-references")
 
+    filtered_reaction_count = 0
     for line in _iterate_tsv(_retrieve("reac_prop.tsv")):
         mnx_id, equation, _, _, ec, _ = line.rstrip("\n").split("\t")
         name = reaction_names.get(mnx_id)
-        reactions[mnx_id] = Reaction(mnx_id, name, equation, ec)
-    logger.info(f"Loaded {len(reactions)} reactions")
+        try:
+            reactions[mnx_id] = Reaction(mnx_id, name, equation, ec)
+        except ValueError:
+            # At the time of this writing, this is expected to amount up to 315
+            # reactions which have an inexact stoichiometry coefficient "(n)"
+            # and hence are unusable in the context of a metabolic model.
+            filtered_reaction_count += 1
+    logger.info(f"Loaded {len(reactions)} reactions (filtered {filtered_reaction_count} unparseable equations)")
 
     for line in _iterate_tsv(_retrieve("reac_xref.tsv")):
         xref, mnx_id, _ = line.rstrip("\n").split("\t")
