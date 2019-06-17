@@ -150,7 +150,10 @@ def load_metanetx_data():
             # reactions which have an inexact stoichiometry coefficient "(n)"
             # and hence are unusable in the context of a metabolic model.
             filtered_reaction_count += 1
-    logger.info(f"Loaded {len(reactions)} reactions (filtered {filtered_reaction_count} unparseable equations)")
+    logger.info(
+        f"Loaded {len(reactions)} reactions (filtered {filtered_reaction_count}"
+        " unparseable equations)"
+    )
 
     for line in _iterate_tsv(_retrieve("reac_xref.tsv")):
         xref, mnx_id, _ = line.rstrip("\n").split("\t")
