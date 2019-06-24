@@ -15,11 +15,11 @@
 
 """Data classes for MetaNetX data."""
 
+import gzip
 import json
 import logging
 import re
 from collections import defaultdict
-import gzip
 
 
 logger = logging.getLogger(__name__)
