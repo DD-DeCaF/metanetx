@@ -13,7 +13,7 @@ Run `make setup` first when initializing the project for the first time. Type
 The MetaNetX source files are stored in `data/`.
 
 Reaction names are not part of MetaNetX, but collected manually by running
-./scripts/generate_reaction_names.py`. Note that the script takes several hours
+`./scripts/generate_reaction_names.py`. Note that the script takes several hours
 to complete. Names are retrieved from cross referenced databases (currently
 BiGG, kegg, ModelSEED and EC numbers are checked).
 
