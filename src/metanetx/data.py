@@ -30,10 +30,7 @@ class Compartment:
         self.mnx_id = mnx_id
         self.name = name
         self.xref = xref
-
-    @property
-    def annotation(self):
-        return compartment_xrefs.get(self.mnx_id, {})
+        self.annotation = defaultdict(list)
 
 
 class Reaction:
@@ -45,10 +42,7 @@ class Reaction:
         self.equation_string = equation_string
         self.equation_parsed = Reaction.parse_equation(self.equation_string)
         self.ec = ec
-
-    @property
-    def annotation(self):
-        return reaction_xrefs.get(self.mnx_id, {})
+        self.annotation = defaultdict(list)
 
     @staticmethod
     def parse_equation(equation_string):
@@ -97,21 +91,13 @@ class Metabolite:
         self.mnx_id = mnx_id
         self.name = name
         self.formula = formula
-
-    @property
-    def annotation(self):
-        return metabolite_xrefs.get(self.mnx_id, {})
+        self.annotation = defaultdict(list)
 
 
 # MetaNetX data will be read into memory into the following dicts, keyed by ID.
 compartments = {}
 reactions = {}
 metabolites = {}
-
-# Cross-references
-compartment_xrefs = {}
-reaction_xrefs = {}
-metabolite_xrefs = {}
 
 # Reaction names are collected separately and merged
 reaction_names = {}
@@ -127,14 +113,15 @@ def load_metanetx_data():
         compartments[mnx_id] = Compartment(mnx_id, name, xref)
     logger.info(f"Loaded {len(compartments)} compartments")
 
+    compartment_xrefs = 0
     for line in _iterate_tsv(gzip.open("data/comp_xref.tsv.gz", "rt")):
         xref, mnx_id, _ = line.rstrip("\n").split("\t")
         if ":" in xref:
             namespace, reference = xref.split(":", 1)
-            if mnx_id not in compartment_xrefs:
-                compartment_xrefs[mnx_id] = defaultdict(list)
-            compartment_xrefs[mnx_id][namespace].append(reference)
-    logger.info(f"Loaded {len(compartment_xrefs)} compartment cross-references")
+            compartment = compartments[mnx_id]
+            compartment.annotation[namespace].append(reference)
+            compartment_xrefs += 1
+    logger.info(f"Loaded {compartment_xrefs} compartment cross-references")
 
     filtered_reaction_count = 0
     for line in _iterate_tsv(gzip.open("data/reac_prop.tsv.gz", "rt")):
@@ -152,28 +139,51 @@ def load_metanetx_data():
         " unparseable equations)"
     )
 
+    reaction_xrefs = 0
+    reaction_xrefs_missing = 0
     for line in _iterate_tsv(gzip.open("data/reac_xref.tsv.gz", "rt")):
         xref, mnx_id, _ = line.rstrip("\n").split("\t")
         if ":" in xref:
-            namespace, reference = xref.split(":", 1)
-            if mnx_id not in reaction_xrefs:
-                reaction_xrefs[mnx_id] = defaultdict(list)
-            reaction_xrefs[mnx_id][namespace].append(reference)
-    logger.info(f"Loaded {len(reaction_xrefs)} reaction cross-references")
+            try:
+                reaction = reactions[mnx_id]
+            except KeyError:
+                # At the time of this writing, 815 references don't exist in the
+                # reaction database. Some are deprecated, but some aren't there
+                # for unknown reasons.
+                reaction_xrefs_missing += 1
+            else:
+                namespace, reference = xref.split(":", 1)
+                reaction.annotation[namespace].append(reference)
+                reaction_xrefs += 1
+    logger.info(
+        f"Loaded {reaction_xrefs} reaction cross-references (ignored "
+        f"{reaction_xrefs_missing} unknown references)"
+    )
 
     for line in _iterate_tsv(gzip.open("data/chem_prop.tsv.gz", "rt")):
         mnx_id, name, formula, _, _, _, _, _, _ = line.rstrip("\n").split("\t")
         metabolites[mnx_id] = Metabolite(mnx_id, name, formula)
     logger.info(f"Loaded {len(metabolites)} metabolites")
 
+    metabolite_xrefs = 0
+    metabolite_xrefs_missing = 0
     for line in _iterate_tsv(gzip.open("data/chem_xref.tsv.gz", "rt")):
         xref, mnx_id, _, _ = line.rstrip("\n").split("\t")
         if ":" in xref:
-            namespace, reference = xref.split(":", 1)
-            if mnx_id not in metabolite_xrefs:
-                metabolite_xrefs[mnx_id] = defaultdict(list)
-            metabolite_xrefs[mnx_id][namespace].append(reference)
-    logger.info(f"Loaded {len(metabolite_xrefs)} metabolite cross-references")
+            try:
+                metabolite = metabolites[mnx_id]
+            except KeyError:
+                # At the time of this writing, there is only one deprecated
+                # reference which doesn't exist in the metabolite database.
+                metabolite_xrefs_missing += 1
+            else:
+                namespace, reference = xref.split(":", 1)
+                metabolite.annotation[namespace].append(reference)
+                metabolite_xrefs += 1
+    logger.info(
+        f"Loaded {metabolite_xrefs} metabolite cross-references (ignored "
+        f"{metabolite_xrefs_missing} unknown references)"
+    )
 
 
 def _iterate_tsv(file_):
