@@ -21,9 +21,6 @@ from marshmallow import Schema, fields
 class SearchSchema(Schema):
     query = fields.Str(required=True)
 
-    class Meta:
-        strict = True
-
 
 class CompartmentSchema(Schema):
     mnx_id = fields.Str()
