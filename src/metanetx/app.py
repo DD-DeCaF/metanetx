@@ -25,6 +25,7 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 
 
 app = Flask(__name__)
+logger = logging.getLogger(__name__)
 
 
 def init_app(application):
@@ -65,3 +66,5 @@ def init_app(application):
 
     # Read the metanetx source files into memory
     data.load_metanetx_data()
+
+    logger.info("Initialization complete")
