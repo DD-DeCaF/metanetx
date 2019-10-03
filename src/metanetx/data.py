@@ -189,6 +189,7 @@ def load_metanetx_data():
         xref, mnx_id, _ = line.rstrip("\n").split("\t")
         if ":" in xref:
             namespace, reference = xref.split(":", 1)
+            namespace = compartment_namespace_map[namespace]
             compartment = compartments[mnx_id]
             compartment.annotation[namespace].append(reference)
             compartment_xrefs += 1
@@ -224,6 +225,7 @@ def load_metanetx_data():
                 reaction_xrefs_missing += 1
             else:
                 namespace, reference = xref.split(":", 1)
+                namespace = reaction_namespace_map[namespace]
                 reaction.annotation[namespace].append(reference)
                 reaction_xrefs += 1
     logger.info(
@@ -249,6 +251,7 @@ def load_metanetx_data():
                 metabolite_xrefs_missing += 1
             else:
                 namespace, reference = xref.split(":", 1)
+                namespace = metabolite_namespace_map[namespace]
                 metabolite.annotation[namespace].append(reference)
                 metabolite_xrefs += 1
     logger.info(
