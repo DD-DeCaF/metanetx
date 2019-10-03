@@ -50,12 +50,20 @@ class Reaction:
         """
         Match an arbitrary search string against this reaction.
 
-        Use Levenshtein Distance to match the query on ID, name or EC number.
-        Returns a number between 0 and 100, 100 being a perfect match.
+        Use Levenshtein Distance to match the query on ID (both MNX and
+        annotations), name or EC number. Returns a number between 0 and 100, 100
+        being a perfect match.
         """
         return max(
             [
                 fuzz.ratio(query, self.mnx_id),
+                # Select the highest match among all annotations
+                max(
+                    max(fuzz.ratio(query, identifier) for identifier in db)
+                    for db in self.annotation.values()
+                )
+                # Handle reactions with no annotations
+                if self.annotation else 0,
                 fuzz.partial_ratio(query, self.name),
                 fuzz.ratio(query, self.ec),
             ]
