@@ -21,6 +21,8 @@ import logging
 import re
 from collections import defaultdict
 
+from fuzzywuzzy import fuzz
+
 
 logger = logging.getLogger(__name__)
 
@@ -43,6 +45,21 @@ class Reaction:
         self.equation_parsed = Reaction.parse_equation(self.equation_string)
         self.ec = ec
         self.annotation = defaultdict(list)
+
+    def match(self, query):
+        """
+        Match an arbitrary search string against this reaction.
+
+        Use Levenshtein Distance to match the query on ID, name or EC number.
+        Returns a number between 0 and 100, 100 being a perfect match.
+        """
+        return max(
+            [
+                fuzz.ratio(query, self.mnx_id),
+                fuzz.partial_ratio(query, self.name),
+                fuzz.ratio(query, self.ec),
+            ]
+        )
 
     @staticmethod
     def parse_equation(equation_string):
@@ -92,6 +109,18 @@ class Metabolite:
         self.name = name
         self.formula = formula
         self.annotation = defaultdict(list)
+
+    def match(self, query):
+        """
+        Match an arbitrary search string against this metabolite.
+
+        Levenshtein Distance is a bit too slow here, so simply check for
+        substring matches case insensitively. Returns True if match.
+        """
+        return (
+            query.lower() in self.mnx_id.lower()
+            or query.lower() in self.name.lower()
+        )
 
 
 # MetaNetX data will be read into memory into the following dicts, keyed by ID.
