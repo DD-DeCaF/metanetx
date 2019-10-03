@@ -139,6 +139,40 @@ metabolites = {}
 # Reaction names are collected separately and merged
 reaction_names = {}
 
+# MetaNetX doesn't use miriam namespace identifiers. We do, so map them
+# correctly.
+compartment_namespace_map = {
+    "name": "name",  # unconfirmed
+    "cco": "cco",
+    "go": "go",
+    "bigg": "bigg.compartment",
+    "seed": "seed.reaction",
+}
+reaction_namespace_map = {
+    "reactome": "reactome",
+    "sabiork": "sabiork.reaction",
+    "deprecated": "deprecated",
+    "kegg": "kegg.reaction",
+    "rhea": "rhea",
+    "metacyc": "metacyc.reaction",
+    "bigg": "bigg.reaction",
+    "seed": "seed.reaction",
+}
+metabolite_namespace_map = {
+    "reactome": "reactome",
+    "sabiork": "sabiork.compound",
+    "chebi": "chebi",
+    "metacyc": "metacyc.compound",
+    "envipath": "envipath",  # unconfirmed
+    "deprecated": "deprecated",
+    "slm": "slm",  # unconfirmed
+    "kegg": "kegg.compound",
+    "hmdb": "hmdb",
+    "lipidmaps": "lipidmaps",
+    "bigg": "bigg.metabolite",
+    "seed": "seed.compound",
+}
+
 
 def load_metanetx_data():
     with gzip.open("data/reaction_names.json.gz", "rt") as file_:
