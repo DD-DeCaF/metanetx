@@ -86,9 +86,7 @@ class MetaboliteResource(MethodResource):
     @use_kwargs(SearchSchema)
     @marshal_with(MetaboliteSchema(many=True), code=200)
     def get(self, query):
-        # Search through the data store for matching metabolites. Levenshtein
-        # Distance is a bit too slow here, so simply search for substring
-        # matches case insensitively.
+        # Search through the data store for matching metabolites.
         metabolites = [m for m in data.metabolites.values() if m.match(query)]
 
         # Limit the results to the first 30.
