@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 def init_app(application):
     """Initialize the main app with config information and routes."""
     # Import local modules here to avoid circular dependencies.
-    from metanetx import errorhandlers, data, parser, resources
+    from metanetx import errorhandlers, parser, resources
     from metanetx.settings import current_config
 
     application.config.from_object(current_config())

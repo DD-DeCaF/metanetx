@@ -18,8 +18,6 @@
 import gzip
 import json
 import logging
-import re
-from collections import defaultdict
 
 from .data import (
     Compartment,
@@ -157,6 +155,7 @@ def _miriam_identifiers(type_, namespace, identifier):
         The corrected namespace
     identifier : string
         The corrected identifier
+
     """
     if type_ == "compartment":
         ns_map = {
