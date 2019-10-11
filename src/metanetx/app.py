@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 def init_app(application):
     """Initialize the main app with config information and routes."""
     # Import local modules here to avoid circular dependencies.
-    from metanetx import errorhandlers, data, resources
+    from metanetx import errorhandlers, data, parser, resources
     from metanetx.settings import current_config
 
     application.config.from_object(current_config())
@@ -65,6 +65,6 @@ def init_app(application):
     application.wsgi_app = ProxyFix(application.wsgi_app)
 
     # Read the metanetx source files into memory
-    data.load_metanetx_data()
+    parser.load_metanetx_data()
 
     logger.info("Initialization complete")
