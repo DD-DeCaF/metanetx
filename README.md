@@ -44,3 +44,9 @@ In order of priority, code must adhere to the rules of the following tools:
     * [bugbear](https://github.com/PyCQA/flake8-bugbear)
 3. The [NumPy docstring standard](https://numpydoc.readthedocs.io/en/latest/format.html#docstring-standard)
 4. [isort](https://github.com/timothycrosley/isort)
+
+### Updating Python dependencies
+
+To compile a new requirements file and then re-build the service with the new requirements, run:
+
+    make pip-compile build

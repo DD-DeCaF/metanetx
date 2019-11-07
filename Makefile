@@ -20,8 +20,9 @@ build:
 
 ## Recompile requirements and store pinned dependencies with hashes.
 pip-compile:
-	docker-compose run --rm web pip-compile --generate-hashes dev-requirements.in
-	docker-compose run --rm web pip-compile --generate-hashes requirements.in
+	docker run --rm -v `pwd`/requirements:/build dddecaf/wsgi-base:alpine-compiler \
+		pip-compile --generate-hashes --upgrade --output-file /build/requirements.txt \
+		/build/requirements.in
 
 ## Start all services in the background.
 start:

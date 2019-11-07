@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM dddecaf/wsgi-base:master
+FROM dddecaf/wsgi-base:alpine
 
 ENV APP_USER=giraffe
 
@@ -28,12 +28,13 @@ RUN addgroup -S -g "${GID}" "${APP_USER}" && \
 
 WORKDIR "${CWD}"
 
-# g++ is required during build-time for fuzzywuzzy's python-Levenshtein
-COPY requirements.txt dev-requirements.txt ./
-RUN apk add --no-cache g++ \
-    && pip install -r requirements.txt -r dev-requirements.txt \
-    && rm -rf /root/.cache/pip \
-    && apk del g++
+COPY requirements ./requirements
+
+RUN set -eux \
+    # build-base is required during build-time for fuzzywuzzy's python-Levenshtein
+    && apk add --no-cache build-base \
+    && pip-sync requirements/requirements.txt \
+    && apk del build-base
 
 COPY . "${CWD}/"
 
