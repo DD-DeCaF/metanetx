@@ -67,6 +67,27 @@ class Reaction:
             ]
         )
 
+    def exact_match(self, query):
+        """
+        Match a string exact, case-insensitively against this reaction.
+
+        Returns True if the query matches the metanetx identifier, name, ec
+        number or any annotation identifier.
+        """
+        query = query.lower()
+        if (
+            query == self.mnx_id.lower()
+            or (self.name and query == self.name.lower())
+            or query == self.ec.lower()
+        ):
+            return True
+
+        for identifiers in self.annotation.values():
+            if query in [identifier.lower() for identifier in identifiers]:
+                return True
+
+        return False
+
     @staticmethod
     def parse_equation(equation_string):
         """
