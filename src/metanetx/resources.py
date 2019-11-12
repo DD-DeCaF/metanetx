@@ -71,26 +71,7 @@ class ReactionResource(MethodResource):
 
         # Collect all unique references to metabolites and compartments, and
         # include the objects in the response.
-        results = []
-        for reaction in reactions:
-            metabolite_ids = set(
-                m["metabolite_id"] for m in reaction.equation_parsed
-            )
-            compartment_ids = set(
-                m["compartment_id"] for m in reaction.equation_parsed
-            )
-            results.append(
-                {
-                    "reaction": reaction,
-                    "metabolites": [
-                        data.metabolites[m] for m in metabolite_ids
-                    ],
-                    "compartments": [
-                        data.compartments[m] for m in compartment_ids
-                    ],
-                }
-            )
-        return results
+        return [reaction.with_references() for reaction in reactions]
 
 
 class ReactionBatchResource(MethodResource):
@@ -111,30 +92,10 @@ class ReactionBatchResource(MethodResource):
 
         # Collect all unique references to metabolites and compartments, and
         # include the objects in the response.
-        results = []
-        for reaction in matches:
-            if not reaction:
-                results.append(None)
-                continue
-
-            metabolite_ids = set(
-                m["metabolite_id"] for m in reaction.equation_parsed
-            )
-            compartment_ids = set(
-                m["compartment_id"] for m in reaction.equation_parsed
-            )
-            results.append(
-                {
-                    "reaction": reaction,
-                    "metabolites": [
-                        data.metabolites[m] for m in metabolite_ids
-                    ],
-                    "compartments": [
-                        data.compartments[m] for m in compartment_ids
-                    ],
-                }
-            )
-        return results
+        return [
+            reaction.with_references() if reaction else None
+            for reaction in matches
+        ]
 
 
 class MetaboliteResource(MethodResource):

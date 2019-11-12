@@ -88,6 +88,23 @@ class Reaction:
 
         return False
 
+    def with_references(self):
+        """
+        Return an object with this reaction and referenced objects.
+
+        Returns a dictionary with keys:
+            "reaction": This reaction object
+            "metabolites": List of referred metabolite objects
+            "compartments": List of referred compartments
+        """
+        metabolite_ids = set(m["metabolite_id"] for m in self.equation_parsed)
+        compartment_ids = set(m["compartment_id"] for m in self.equation_parsed)
+        return {
+            "reaction": self,
+            "metabolites": [metabolites[m] for m in metabolite_ids],
+            "compartments": [compartments[m] for m in compartment_ids],
+        }
+
     @staticmethod
     def parse_equation(equation_string):
         """
