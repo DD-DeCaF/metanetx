@@ -16,10 +16,15 @@
 """Marshmallow schemas for marshalling the API endpoints."""
 
 from marshmallow import Schema, fields
+from webargs.fields import DelimitedList
 
 
 class SearchSchema(Schema):
     query = fields.Str(required=True)
+
+
+class BatchSearchSchema(Schema):
+    query = DelimitedList(fields.Str(), required=True)
 
 
 class CompartmentSchema(Schema):

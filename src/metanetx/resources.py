@@ -21,7 +21,12 @@ from flask_apispec import MethodResource, marshal_with, use_kwargs
 from flask_apispec.extension import FlaskApiSpec
 
 from . import data
-from .schemas import MetaboliteSchema, ReactionResponseSchema, SearchSchema
+from .schemas import (
+    BatchSearchSchema,
+    MetaboliteSchema,
+    ReactionResponseSchema,
+    SearchSchema,
+)
 
 
 def init_app(app):
@@ -36,6 +41,7 @@ def init_app(app):
     docs = FlaskApiSpec(app)
     app.add_url_rule("/healthz", view_func=healthz)
     register("/reactions", ReactionResource)
+    register("/reactions/batch", ReactionBatchResource)
     register("/metabolites", MetaboliteResource)
 
 
@@ -66,6 +72,50 @@ class ReactionResource(MethodResource):
         # include the objects in the response.
         results = []
         for reaction in reactions:
+            metabolite_ids = set(
+                m["metabolite_id"] for m in reaction.equation_parsed
+            )
+            compartment_ids = set(
+                m["compartment_id"] for m in reaction.equation_parsed
+            )
+            results.append(
+                {
+                    "reaction": reaction,
+                    "metabolites": [
+                        data.metabolites[m] for m in metabolite_ids
+                    ],
+                    "compartments": [
+                        data.compartments[m] for m in compartment_ids
+                    ],
+                }
+            )
+        return results
+
+
+class ReactionBatchResource(MethodResource):
+    @use_kwargs(BatchSearchSchema)
+    @marshal_with(ReactionResponseSchema(many=True), code=200)
+    def get(self, query):
+        # Search through the data store for multiple exact matching reactions.
+        indices = list(range(len(query)))
+        matches = [None] * len(query)
+        for reaction in data.reactions.values():
+            for index in indices:
+                if reaction.exact_match(query[index]):
+                    # Found a match - add it to the results, and remove it from
+                    # the indices list to skip searching for it in the remaining
+                    # reactions.
+                    indices.remove(index)
+                    matches[index] = reaction
+
+        # Collect all unique references to metabolites and compartments, and
+        # include the objects in the response.
+        results = []
+        for reaction in matches:
+            if not reaction:
+                results.append(None)
+                continue
+
             metabolite_ids = set(
                 m["metabolite_id"] for m in reaction.equation_parsed
             )
