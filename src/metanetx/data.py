@@ -149,6 +149,23 @@ class Metabolite:
             or query.lower() in self.name.lower()
         )
 
+    def exact_match(self, query):
+        """
+        Match a string exact, case-insensitively against this metabolite.
+
+        Returns True if the query matches the metanetx identifier, name or any
+        annotation identifier.
+        """
+        query = query.lower()
+        if query == self.mnx_id.lower() or query == self.name.lower():
+            return True
+
+        for identifiers in self.annotation.values():
+            if query in [identifier.lower() for identifier in identifiers]:
+                return True
+
+        return False
+
 
 # MetaNetX data will be read into memory into the following dicts, keyed by ID.
 compartments = {}
