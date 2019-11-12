@@ -43,6 +43,7 @@ def init_app(app):
     register("/reactions", ReactionResource)
     register("/reactions/batch", ReactionBatchResource)
     register("/metabolites", MetaboliteResource)
+    register("/metabolites/batch", MetaboliteBatchResource)
 
 
 def healthz():
@@ -146,3 +147,21 @@ class MetaboliteResource(MethodResource):
         # Limit the results to the first 30.
         metabolites = metabolites[:30]
         return metabolites
+
+
+class MetaboliteBatchResource(MethodResource):
+    @use_kwargs(BatchSearchSchema)
+    @marshal_with(MetaboliteSchema(many=True), code=200)
+    def get(self, query):
+        # Search through the data store for multiple exact matching reactions.
+        indices = list(range(len(query)))
+        matches = [None] * len(query)
+        for metablite in data.metabolites.values():
+            for index in indices:
+                if metablite.exact_match(query[index]):
+                    # Found a match - add it to the results, and remove it from
+                    # the indices list to skip searching for it in the remaining
+                    # metablites.
+                    indices.remove(index)
+                    matches[index] = metablite
+        return matches
