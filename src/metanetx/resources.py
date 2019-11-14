@@ -79,23 +79,15 @@ class ReactionBatchResource(MethodResource):
     @marshal_with(ReactionResponseSchema(many=True), code=200)
     def get(self, query):
         # Search through the data store for multiple exact matching reactions.
-        indices = list(range(len(query)))
-        matches = [None] * len(query)
-        for reaction in data.reactions.values():
-            for index in indices:
-                if reaction.exact_match(query[index]):
-                    # Found a match - add it to the results, and remove it from
-                    # the indices list to skip searching for it in the remaining
-                    # reactions.
-                    indices.remove(index)
-                    matches[index] = reaction
-
-        # Collect all unique references to metabolites and compartments, and
-        # include the objects in the response.
-        return [
-            reaction.with_references() if reaction else None
-            for reaction in matches
-        ]
+        results = []
+        for q in query:
+            try:
+                results.append(
+                    data.reaction_key_index[q.lower()].with_references()
+                )
+            except KeyError:
+                results.append(None)
+        return results
 
 
 class MetaboliteResource(MethodResource):
@@ -115,14 +107,4 @@ class MetaboliteBatchResource(MethodResource):
     @marshal_with(MetaboliteSchema(many=True), code=200)
     def get(self, query):
         # Search through the data store for multiple exact matching reactions.
-        indices = list(range(len(query)))
-        matches = [None] * len(query)
-        for metablite in data.metabolites.values():
-            for index in indices:
-                if metablite.exact_match(query[index]):
-                    # Found a match - add it to the results, and remove it from
-                    # the indices list to skip searching for it in the remaining
-                    # metablites.
-                    indices.remove(index)
-                    matches[index] = metablite
-        return matches
+        return [data.metabolite_key_index.get(q.lower()) for q in query]
