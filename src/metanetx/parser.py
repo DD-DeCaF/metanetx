@@ -24,10 +24,10 @@ from .data import (
     Metabolite,
     Reaction,
     compartments,
-    metabolites,
-    reactions,
-    reaction_key_index,
     metabolite_key_index,
+    metabolites,
+    reaction_key_index,
+    reactions,
 )
 
 
