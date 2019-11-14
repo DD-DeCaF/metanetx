@@ -26,6 +26,8 @@ from .data import (
     compartments,
     metabolites,
     reactions,
+    reaction_key_index,
+    metabolite_key_index,
 )
 
 
@@ -60,7 +62,14 @@ def load_metanetx_data():
         mnx_id, equation, _, _, ec, _ = line.rstrip("\n").split("\t")
         name = reaction_names.get(mnx_id)
         try:
-            reactions[mnx_id] = Reaction(mnx_id, name, equation, ec)
+            reaction = Reaction(mnx_id, name, equation, ec)
+            reactions[mnx_id] = reaction
+            reaction_key_index[mnx_id.lower()] = reaction
+            # We haven't been able to map names for all reactions, so ignore the
+            # missing ones.
+            if name:
+                reaction_key_index[name.lower()] = reaction
+            reaction_key_index[ec.lower()] = reaction
         except ValueError:
             # At the time of this writing, this is expected to amount up to 315
             # reactions which have an inexact stoichiometry coefficient "(n)"
@@ -89,6 +98,7 @@ def load_metanetx_data():
                     "reaction", namespace, reference
                 )
                 reaction.annotation[namespace].append(reference)
+                reaction_key_index[reference.lower()] = reaction
                 reaction_xrefs += 1
     logger.info(
         f"Loaded {reaction_xrefs} reaction cross-references (ignored "
@@ -97,7 +107,10 @@ def load_metanetx_data():
 
     for line in _iterate_tsv(gzip.open("data/chem_prop.tsv.gz", "rt")):
         mnx_id, name, formula, _, _, _, _, _, _ = line.rstrip("\n").split("\t")
-        metabolites[mnx_id] = Metabolite(mnx_id, name, formula)
+        metabolite = Metabolite(mnx_id, name, formula)
+        metabolites[mnx_id] = metabolite
+        metabolite_key_index[mnx_id.lower()] = metabolite
+        metabolite_key_index[name.lower()] = metabolite
     logger.info(f"Loaded {len(metabolites)} metabolites")
 
     metabolite_xrefs = 0
@@ -117,6 +130,7 @@ def load_metanetx_data():
                     "metabolite", namespace, reference
                 )
                 metabolite.annotation[namespace].append(reference)
+                metabolite_key_index[reference.lower()] = metabolite
                 metabolite_xrefs += 1
     logger.info(
         f"Loaded {metabolite_xrefs} metabolite cross-references (ignored "

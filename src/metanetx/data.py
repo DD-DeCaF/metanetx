@@ -188,3 +188,8 @@ class Metabolite:
 compartments = {}
 reactions = {}
 metabolites = {}
+
+# These dictionaries also include names and identifiers from other namespaces,
+# lowercased for quick case-insensitive lookup.
+reaction_key_index = {}
+metabolite_key_index = {}
