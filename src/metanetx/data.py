@@ -67,27 +67,6 @@ class Reaction:
             ]
         )
 
-    def exact_match(self, query):
-        """
-        Match a string exact, case-insensitively against this reaction.
-
-        Returns True if the query matches the metanetx identifier, name, ec
-        number or any annotation identifier.
-        """
-        query = query.lower()
-        if (
-            query == self.mnx_id.lower()
-            or (self.name and query == self.name.lower())
-            or query == self.ec.lower()
-        ):
-            return True
-
-        for identifiers in self.annotation.values():
-            if query in [identifier.lower() for identifier in identifiers]:
-                return True
-
-        return False
-
     def with_references(self):
         """
         Return an object with this reaction and referenced objects.
@@ -165,23 +144,6 @@ class Metabolite:
             query.lower() in self.mnx_id.lower()
             or query.lower() in self.name.lower()
         )
-
-    def exact_match(self, query):
-        """
-        Match a string exact, case-insensitively against this metabolite.
-
-        Returns True if the query matches the metanetx identifier, name or any
-        annotation identifier.
-        """
-        query = query.lower()
-        if query == self.mnx_id.lower() or query == self.name.lower():
-            return True
-
-        for identifiers in self.annotation.values():
-            if query in [identifier.lower() for identifier in identifiers]:
-                return True
-
-        return False
 
 
 # MetaNetX data will be read into memory into the following dicts, keyed by ID.
