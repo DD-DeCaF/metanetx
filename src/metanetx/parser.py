@@ -69,7 +69,9 @@ def load_metanetx_data():
             # missing ones.
             if name:
                 reaction_key_index[name.lower()] = reaction
-            reaction_key_index[ec.lower()] = reaction
+            # Some reactions have empty EC numbers, ignore those.
+            if ec:
+                reaction_key_index[ec.lower()] = reaction
         except ValueError:
             # At the time of this writing, this is expected to amount up to 315
             # reactions which have an inexact stoichiometry coefficient "(n)"
