@@ -4,6 +4,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        - BASE_TAG=${BASE_TAG}
+        - BUILD_COMMIT=${BUILD_COMMIT:-unknown}
+        - BUILD_TIMESTAMP=${BUILD_TIMESTAMP:-unknown}
     image: gcr.io/dd-decaf-cfbf6/metanetx:${IMAGE_TAG:-latest}
     networks:
       default:
@@ -20,7 +24,6 @@ services:
       - SCRIPT_NAME=${SCRIPT_NAME}
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost:4200}
       - SENTRY_DSN=${SENTRY_DSN}
-    command: gunicorn -c gunicorn.py metanetx.wsgi:app
 
 # Additional services that the `web` service `depends_on` should usually only
 # be on the default network and not exposed on the general network, i.e.,

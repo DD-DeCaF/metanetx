@@ -39,7 +39,6 @@ spec:
             secretKeyRef:
               name: metanetx
               key: SENTRY_DSN
-        command: ["gunicorn", "-c", "gunicorn.py", "metanetx.wsgi:app"]
         readinessProbe:
           httpGet:
             path: /metanetx/healthz
